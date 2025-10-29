@@ -9,6 +9,13 @@ from .chapa import initiate_payment, verify_payment
 from django.http import JsonResponse
 from django.shortcuts import redirect
 
+from rest_framework import viewsets
+from .models import Booking
+from .serializers import BookingSerializer
+from .tasks import send_booking_confirmation_email
+
+
+
 def home(request):
     # Option 1: simple JSON
     return JsonResponse({"message": "Welcome to The Travel App"})
@@ -77,3 +84,16 @@ def verify_payment_status(request, booking_reference):
         "amount": payment.amount,
         "currency": payment.currency,
     })
+
+
+# Trigger email in BookingViewSet
+class BookingViewSet(viewsets.ModelViewSet):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+
+    def perform_create(self, serializer):
+        booking = serializer.save()
+        user_email = booking.user.email  # assuming booking has a user field
+        booking_details = f"Booking ID: {booking.id}, Destination: {booking.destination}"
+        send_booking_confirmation_email.delay(user_email, booking_details)
+

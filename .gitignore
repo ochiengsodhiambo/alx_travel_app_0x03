@@ -1,0 +1,27 @@
+cat > .gitignore << 'EOF'
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.sqlite3
+
+# Virtual environments
+venv/
+.env
+
+# Docker
+*.pid
+*.log
+*.db
+/media
+/static
+*.DS_Store
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+
+# Build
+build/
+dist/
+EOF
